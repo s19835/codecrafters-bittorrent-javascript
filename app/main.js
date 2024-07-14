@@ -12,8 +12,19 @@ function decodeBencode(bencodedValue) {
       throw new Error("Invalid encoded value");
     }
     return bencodedValue.substr(firstColonIndex + 1);
-  } else {
-    throw new Error("Only strings are supported at the moment");
+  } 
+
+  // Check if the first and last character is a specification of integer, i,e
+  else if (bencodedValue.startsWith('i') && bencodedValue.endsWith('e')) {
+    const number = bencodedValue.slice(1, bencodedValue.length - 1);
+    if (isNaN(number)) {
+      throw new Error("Invalid integer value");
+    }
+    return parseInt(number);
+  }
+
+  else {
+    throw new Error("Unsupported bencode value");
   }
 }
 
