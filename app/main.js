@@ -1,5 +1,5 @@
-const process = require("process");
-const util = require("util");
+import { argv } from "process";
+import util from "util";
 
 // Examples:
 // - decodeBencode("5:hello") -> "hello"
@@ -18,7 +18,7 @@ function decodeBencode(bencodedValue) {
 }
 
 function main() {
-  const command = process.argv[2];
+  const command = argv[2];
 
   // You can use print statements as follows for debugging, they'll be visible when running tests.
   console.log("Logs from your program will appear here!");
