@@ -31,31 +31,37 @@ function decodeBencode(bencodedValue) {
     return parseInt(number);
   }
 
+  // Check for the list condition (starts with l)
   else if (bencodedValue.startsWith('l')) {
     const list = [];
     const endIndex = bencodedValue.length - 1;
     let i = 1;
-    const openBrack = 1;
-    const closeBrack = -1;
-    let brack = 1;
 
     while (i < endIndex) {
       if (bencodedValue[i] === 'i') {
-        const firstIndexOfe = bencodedValue.indexOf('e', i); // find the first occurrance of the e to complete i.e
-        const number = bencodedValue.slice(i + 1, firstIndexOfe);
+        const firstIndexOfE = bencodedValue.indexOf('e', i);
+        const number = bencodedValue.slice(i + 1, firstIndexOfE);
 
-        if (isNaN(number)) throw new Error('Invalid integer value');
-        else list.push(parseInt(number));
+        if (isNaN(number)) {
+          throw new Error('Invalid integer value');
+        } 
+        
+        else {
+          list.push(parseInt(number));
+        }
 
-        i = firstIndexOfe + 1;
-      }
-
+        i = firstIndexOfE + 1;
+      } 
+      
       else if (!isNaN(bencodedValue[i])) {
         let strLength = bencodedValue[i];
-        if (!isNaN(bencodedValue[i + 1])) strLength += bencodedValue[i + 1];
+        
+        if (!isNaN(bencodedValue[i + 1])) {
+          strLength += bencodedValue[i + 1];
+        }
         
         const firstColonIndex = bencodedValue.indexOf(":", i);
-    
+
         if (firstColonIndex === -1) {
           throw new Error("Invalid encoded value");
         }
@@ -64,47 +70,37 @@ function decodeBencode(bencodedValue) {
 
         list.push(str);
         i = parseInt(strLength) + firstColonIndex + 1;
-      }
-
+      } 
+      
       else if (bencodedValue[i] === 'l') {
-        const remainings = bencodedValue.substring(i, bencodedValue.length - 1);
-        // find the closing e index of the sublist
-        // const openBrack = 1;
-        // const closeBrack = -1;
-        // let brack = 1;
-        let endIndex;
-        console.log(remainings);
-        for (let j = 1; j < remainings.length; j++) {
-          if (remainings[j] === 'i') {
-            brack += openBrack;
-            console.log(brack);
+        let subListStartIndex = i;
+        let bracketCount = 1;
+        i++;
+
+        while (i < endIndex && bracketCount > 0) {
+          if (bencodedValue[i] === 'l') {
+            bracketCount++;
+          } 
+          
+          else if (bencodedValue[i] === 'e') {
+            bracketCount--;
           }
           
-          else if (remainings[j] === 'e') {
-            if (brack > 1) {
-              brack += closeBrack;
-              console.log(brack);
-            }
-            
-            else if (brack === 1) {
-              endIndex = j;
-              brack += closeBrack;
-            }
+          i++;
+        }
 
-            else throw new Error('Invalid bencoded value');
-          }
-        } 
-
-        const sublist = remainings.substring(i, endIndex + 1);
+        const sublist = bencodedValue.substring(subListStartIndex, i);
         list.push(decodeBencode(sublist));
-        i += endIndex + 1;
+      } 
+        
+      else {
+        i++;
       }
-
-      else throw new Error('Invalid bencoded values');
     }
 
     return list;
   }
+
 
   else {
     throw new Error("Unsupported bencode value");
