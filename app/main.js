@@ -50,6 +50,25 @@ function decodeBencode(bencodedValue) {
       result = list;
       newIndex += 1;
     } 
+
+    else if (bencodedValue[index] === 'd') {
+      let dictionary = {};
+      newIndex = index + 1;
+
+      while (bencodedValue[newIndex] !== 'e') {
+        // decode key which need to be a string
+        const [key, valueIndex] = decodeElement(bencodedValue, newIndex);
+        if (typeof key !== 'string') throw new Error('Dictionary keys must be strings');
+        // decode value
+        const [value, keyNextIndex] = decodeElement(bencodedValue, valueIndex);
+
+        dictionary[key] = value;
+        newIndex = keyNextIndex;
+      }
+
+      result = dictionary;
+      newIndex += 1;
+    }
     
     else {
       throw new Error("Unsupported bencode value");
