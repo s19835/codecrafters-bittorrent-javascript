@@ -1,5 +1,6 @@
 import { argv } from "process";
 import util from "util";
+import { readFileSync } from "fs";
 
 // Examples:
 // - decodeBencode("5:hello") -> "hello"
@@ -81,6 +82,13 @@ function decodeBencode(bencodedValue) {
   return decodedValue;
 }
 
+// Function to read and decode torrent file
+function readFile(torrentFile) {
+  const fileBuffer = readFileSync(torrentFile);
+  const fileContent = fileBuffer.toString('binary');
+  return decodeBencode(fileContent);
+}
+
 function main() {
   const command = argv[2];
 
@@ -92,6 +100,14 @@ function main() {
     // because JS doesn't distinguish between bytes and strings in the same way Python does.
     console.log(JSON.stringify(decodeBencode(bencodedValue)));
   } 
+
+  else if (command === "info") {
+    const torrentFile = process.argv[3];
+
+    const fileData = readFile(torrentFile);
+    console.log('Tracker URL:', fileData.announce);
+    console.log('Length:', fileData.info.length);
+  }
   
   else {
     throw new Error(`Unknown command ${command}`);
