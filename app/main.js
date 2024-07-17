@@ -31,10 +31,13 @@ function decodeBencode(bencodedValue) {
     return parseInt(number);
   }
 
-  else if (bencodedValue.startsWith('l') && bencodedValue.endsWith('e')) {
+  else if (bencodedValue.startsWith('l')) {
     const list = [];
     const endIndex = bencodedValue.length - 1;
     let i = 1;
+    const openBrack = 1;
+    const closeBrack = -1;
+    let brack = 1;
 
     while (i < endIndex) {
       if (bencodedValue[i] === 'i') {
@@ -66,18 +69,22 @@ function decodeBencode(bencodedValue) {
       else if (bencodedValue[i] === 'l') {
         const remainings = bencodedValue.substring(i, bencodedValue.length - 1);
         // find the closing e index of the sublist
-        const openBrack = 1;
-        const closeBrack = -1;
-        let brack = 1;
+        // const openBrack = 1;
+        // const closeBrack = -1;
+        // let brack = 1;
         let endIndex;
-       
-        for (let j = 0; j < remainings.length; j++) {
+        console.log(remainings);
+        for (let j = 1; j < remainings.length; j++) {
           if (remainings[j] === 'i') {
             brack += openBrack;
+            console.log(brack);
           }
           
           else if (remainings[j] === 'e') {
-            if (brack > 1) brack += closeBrack;
+            if (brack > 1) {
+              brack += closeBrack;
+              console.log(brack);
+            }
             
             else if (brack === 1) {
               endIndex = j;
@@ -89,7 +96,6 @@ function decodeBencode(bencodedValue) {
         } 
 
         const sublist = remainings.substring(i, endIndex + 1);
-        console.log(sublist);
         list.push(decodeBencode(sublist));
         i += endIndex + 1;
       }
