@@ -19,8 +19,10 @@ function decodeBencode(bencodedValue) {
   } 
 
   // Check if the first and last character is a specification of integer, i,e
-  else if (bencodedValue.startsWith('i') && bencodedValue.endsWith('e')) {
-    const number = bencodedValue.slice(1, bencodedValue.length - 1);
+  else if (bencodedValue.startsWith('i')) {
+    const indexOfe = bencodedValue.indexOf('e');
+
+    const number = indexOfe !== -1 ? bencodedValue.slice(1, indexOfe) : NaN;
     
     if (isNaN(number)) {
       throw new Error("Invalid integer value");
@@ -62,16 +64,17 @@ function decodeBencode(bencodedValue) {
       }
 
       else if (bencodedValue[i] === 'l') {
-        const remainings = bencodedValue.substring(i, bencodedValue.length - 2);
-        
+        const remainings = bencodedValue.substring(i, bencodedValue.length - 1);
         // find the closing e index of the sublist
         const openBrack = 1;
         const closeBrack = -1;
         let brack = 1;
         let endIndex;
-
+       
         for (let j = 0; j < remainings.length; j++) {
-          if (remainings[j] === 'i') brack += openBrack;
+          if (remainings[j] === 'i') {
+            brack += openBrack;
+          }
           
           else if (remainings[j] === 'e') {
             if (brack > 1) brack += closeBrack;
@@ -79,13 +82,14 @@ function decodeBencode(bencodedValue) {
             else if (brack === 1) {
               endIndex = j;
               brack += closeBrack;
-            };
+            }
+
+            else throw new Error('Invalid bencoded value');
           }
-          
-          else throw new Error('Invalid bencoded value');
         } 
 
         const sublist = remainings.substring(i, endIndex + 1);
+        console.log(sublist);
         list.push(decodeBencode(sublist));
         i += endIndex + 1;
       }
