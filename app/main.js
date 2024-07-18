@@ -102,10 +102,20 @@ function bencode(value) {
 }
 
 // Function to read and decode torrent file
-function readFile(torrentFile) {
+function parseTorrentFile(torrentFile) {
+  // Read file and extract data
   const fileBuffer = readFileSync(torrentFile);
   const fileContent = fileBuffer.toString('binary');
-  return decodeBencode(fileContent);
+  const fileData = decodeBencode(fileContent);
+
+  // create sha hash of info
+  const info = fileData.info.toString();
+  const bencodedInfo = bencode(info);
+  const hash = crypto.createHash('sha1').update(bencodedInfo).digest('hex');
+  
+  console.log('Tracker URL:', fileData.announce);
+  console.log('Length:', fileData.info.length);
+  console.log('Info Hash:', hash);
 }
 
 function main() {
@@ -123,10 +133,7 @@ function main() {
   else if (command === "info") {
     const torrentFile = process.argv[3];
 
-    const fileData = readFile(torrentFile);
-    console.log('Tracker URL:', fileData.announce);
-    console.log('Length:', fileData.info.length);
-    console.log('Info Hash:', createSHA(fileData.info));
+
   }
   
   else {
