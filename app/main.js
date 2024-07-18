@@ -85,9 +85,7 @@ function decodeBencode(bencodedValue) {
 
 // Function to bencode values
 function bencode(value) {
-  if (typeof value === 'string') return `${Buffer.byteLength(value, 'utf8')}:${value}`;
-
-  else if (Buffer.isBuffer(value)) return `${value.length}:${value.toString('binary')}`;
+  if (typeof value === 'string') return `${value.length}:${value}`;
 
   else if (typeof value === 'number') return `i${value}e`;
 
@@ -111,16 +109,13 @@ function parseTorrentFile(torrentFile) {
   const fileData = decodeBencode(fileContent);
 
   // create sha hash of info
-  const info = fileData.info.toString();
+  const info = fileData.info;
   const bencodedInfo = bencode(info);
   const hash = crypto.createHash('sha1').update(bencodedInfo, 'binary').digest('hex');
   
   console.log('Tracker URL:', fileData.announce);
   console.log('Length:', fileData.info.length);
   console.log('Info Hash:', hash);
-
-  console.log(fileData.info);
-  console.log(decodeBencode(bencodedInfo));
 }
 
 function main() {
