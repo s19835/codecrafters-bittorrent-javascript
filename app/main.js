@@ -1,6 +1,7 @@
 import { argv } from "process";
 import util from "util";
 import { readFileSync } from "fs";
+import crypto from "crypto";
 
 // Examples:
 // - decodeBencode("5:hello") -> "hello"
@@ -82,6 +83,24 @@ function decodeBencode(bencodedValue) {
   return decodedValue;
 }
 
+// Function to bencode values
+function bencode(value) {
+  if (typeof value === 'string') return `${value.length}:${value}`;
+
+  else if (typeof value === 'number') return `i${value}e`;
+
+  else if (Array.isArray(value)) return `l${value.map(bencode).join('')}e`;
+
+  else if (typeof value === 'object') {
+    const keys = Object.keys(value).sort();
+    return `d${keys.map(key => `${bencode(key)}${bencode(value[key])}`).join('')}e`;
+  }
+
+  else {
+    throw new Error("Unsupported bencode value type");
+  }
+}
+
 // Function to read and decode torrent file
 function readFile(torrentFile) {
   const fileBuffer = readFileSync(torrentFile);
@@ -107,6 +126,7 @@ function main() {
     const fileData = readFile(torrentFile);
     console.log('Tracker URL:', fileData.announce);
     console.log('Length:', fileData.info.length);
+    console.log('Info Hash:', createSHA(fileData.info));
   }
   
   else {
