@@ -116,6 +116,25 @@ function parseTorrentFile(torrentFile) {
   console.log('Tracker URL:', fileData.announce);
   console.log('Length:', fileData.info.length);
   console.log('Info Hash:', hash);
+  console.log('Piece Length:', fileData.info['piece length']);
+
+  const pieces = fileData.info.pieces;
+  const pieceHashes = [];
+
+  for (let i = 0; i < pieces.length; i += 20) {
+    const pieceHash = pieces.slice(i, 20 + i);
+    pieceHashes.push(Buffer.from(pieceHash, 'binary').toString('hex'));
+  }
+  
+  console.log('Piece Hashes:');
+  pieceHashes.forEach(piece => console.log(piece));
+  /*
+  Piece Length: 32768
+  Piece Hashes:
+  e876f67a2a8886e8f36b136726c30fa29703022d
+  6e2275e604a0766656736e81ff10b55204ad8d35
+  f00d937a0213df1982bc8d097227ad9e909acc17
+  */
 }
 
 function main() {
@@ -132,7 +151,7 @@ function main() {
 
   else if (command === "info") {
     const torrentFile = process.argv[3];
-
+    
     parseTorrentFile(torrentFile);
   }
   
